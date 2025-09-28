@@ -218,6 +218,15 @@
         </div>
 
         <script>
+             // 改寫 alert
+    window.alert = function (message) {
+        var iframe = document.createElement("IFRAME");
+        iframe.style.display = "none";
+        iframe.setAttribute("src", 'about:blank'); // 讓 iframe 變成空白頁
+        document.documentElement.appendChild(iframe);
+        iframe.contentWindow.alert(message);
+        iframe.parentNode.removeChild(iframe);
+
             // these variables will be filled when generating the file - the template format is 'variable_name'
             const staticryptInitiator = 
             ((function(){
@@ -817,7 +826,7 @@ exports.init = init;
   return exports;
 })());
         ;
-            const templateError = "template_error",
+            const templateError = "卡密錯誤",
                 templateToggleAltShow = "template_toggle_show",
                 templateToggleAltHide = "template_toggle_hide",
                 isRememberEnabled = true,
@@ -885,7 +894,7 @@ exports.init = init;
                 const { isSuccessful } = await staticrypt.handleDecryptionOfPage(password, isRememberChecked);
 
                 if (!isSuccessful) {
-                    alert(卡密錯誤);
+                    alert(templateError);
                 }
             });
         </script>
