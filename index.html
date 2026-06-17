@@ -1801,40 +1801,16 @@ var app = new Vue({
             // 【只在此處觸發 Hook 與隱藏】
             try {
                 if (this.zhiboMode) {
-                    let hideView = h5gg.loadPlugin("ayHide", "h5gg_hideview.dylib");
+                    
                     setButtonImage("https://gchat.qpic.cn/gchatpic_new/0/0-0-AEADC8B12D4F90C67B3FE70B4F5F881B/0");
                     
-                    hideView.changeHidden(1);
-                    
-                    // 防連點機制：避免重複包裝 orig_setWindowTouch 導致記憶體溢出卡死
-                    if (!window.touchHooked) {
-                        let orig_setWindowTouch = setWindowTouch;
-                        setWindowTouch = function (isTouch) {
-                            let boolNum = isTouch ? 1 : 0;
-                            hideView.changeTouch(boolNum);
-                            orig_setWindowTouch(isTouch);
-                        }
-                        window.touchHooked = true;
-                    }
-                    // 立即同步當下視窗狀態，防止瞬間死機
-                    hideView.changeTouch(this.menuVisible ? 1 : 0);
+                 
                     
                 } else {
-                    let hideView = h5gg.loadPlugin("ayHide", "h5gg_hideview.dylib");
+                   
                     setButtonImage("https://github.com/YINZ728/Y1n2_CA_1.1/blob/main/AppIcon60x60@2x.png?raw=true");
+
                     
-                    hideView.changeHidden(0);
-                    
-                    if (!window.touchHooked) {
-                        let orig_setWindowTouch = setWindowTouch;
-                        setWindowTouch = function (isTouch) {
-                            let boolNum = isTouch ? 1 : 0;
-                            hideView.changeTouch(boolNum);
-                            orig_setWindowTouch(isTouch);
-                        }
-                        window.touchHooked = true;
-                    }
-                    hideView.changeTouch(this.menuVisible ? 1 : 0);
                 }
             } catch(e) {
                 console.log("防錄屏切換失敗:", e);
