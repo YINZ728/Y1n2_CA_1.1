@@ -46,7 +46,7 @@
             background-size: cover;
             position: relative;
         }
-        * {
+                * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -57,7 +57,10 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent !important;
             tap-highlight-color: transparent !important;
+            /* 👇 加上這一行：徹底禁用 iOS 雙擊放大與手勢干擾 */
+            touch-action: manipulation;
         }
+
         *:not(input, checkbox, textarea) {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -501,6 +504,16 @@
     </div>
 
 <script>  
+// ==================== 徹底阻斷 iOS 彈出書寫工具與鍵盤 ====================
+document.addEventListener('focus', function(e) {
+    if (e.target) e.target.blur(); // 只要有任何東西想獲取焦點，瞬間打斷
+}, true);
+
+document.addEventListener('touchstart', function(e) {
+    if (document.activeElement) document.activeElement.blur();
+}, { passive: false });
+// ========================================================================
+
 // ==================== 腳本啟動卡密驗證與記憶區域 ====================
 // 1. 先檢查設備是否已經記住過正確卡密
 if (localStorage.getItem('script_auth_passed') !== 'true') {
