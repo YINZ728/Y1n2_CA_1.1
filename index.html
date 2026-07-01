@@ -1150,7 +1150,7 @@ var app = new Vue({
                     // 卡密已驗證，直接啟動 (因為我們已將 renderESP 設為永久執行，因此不需再次 requestAnimationFrame)
                 } 
                 else {
-                    let pwd = prompt("請輸入繪製卡密：", ""); const validPasswords = ["iovecxin", "iovecxin1", "8150401C"];
+                    let pwd = prompt("請輸入繪製卡密：", ""); const validPasswords = ["iovecxin", "iovecxin1", "8150401C", "8120201E"];
                     if (validPasswords.includes(pwd)) {
                         if (confirm("卡密正確！是否記憶卡密？")) localStorage.setItem('draw_auth_passed', 'true'); else localStorage.removeItem('draw_auth_passed');
                     } else {
