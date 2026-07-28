@@ -902,13 +902,22 @@ function renderESP() {
             currentLocalAddr = pA;
         }
 
-        alivePlayers.push({ pA: pA, posAddr: posAddr, teamId: tId, px: px, py: py, pz: pz, cHP: cHP });
+        alivePlayers.push({ pA: pA, posAddr: posAddr, teamId: tId, px: px, py: py, pz: pz, cHP: cHP , dist: camDist});
     }
-
     if (currentLocalTeamId !== -1) {
         window.myTeamId = currentLocalTeamId;
         window.myPosAddr = currentLocalPosAddr;
         window.myPlayerAddr = currentLocalAddr;
+    }
+
+    // ====== 新增：在每一幀繪製前，只讀取一次你的最新 3D 坐標，效能極佳 ======
+    let myX = 0, myY = 0, myZ = 0;
+    let hasMyPos = false;
+    if (window.myPosAddr) {
+        myX = readF32(window.myPosAddr);
+        myY = readF32(window.myPosAddr + 4);
+        myZ = readF32(window.myPosAddr + 8);
+        hasMyPos = true;
     }
 
     let eC = 0; 
@@ -922,54 +931,55 @@ function renderESP() {
 
         if (!isTeammate) eC++;
 
-        // ==================== 邊緣預警邏輯開始 ====================
+        // 計算矩陣投影
         let cx = m[0]*p.px + m[4]*p.py + m[8]*p.pz + m[12];
         let cy = m[1]*p.px + m[5]*p.py + m[9]*p.pz + m[13];
         let cw = m[3]*p.px + m[7]*p.py + m[11]*p.pz + m[15];
 
-        let isBehind = cw < 0.01; // 判斷是否在背後
+        // ====== 新增：精準的三維空間直線距離計算 ======
+        let realDist = Math.abs(cw || 0.0001); // 預設容錯值
+        if (hasMyPos) {
+            // 使用勾股定理計算真實絕對距離，完全不受視角旋轉與螢幕邊緣拉伸影響
+            realDist = Math.sqrt(Math.pow(p.px - myX, 2) + Math.pow(p.py - myY, 2) + Math.pow(p.pz - myZ, 2));
+        }
+
+        // ==================== 邊緣預警邏輯開始 ====================
+        let isBehind = cw < 0.01; 
         let iW = 1.0 / Math.abs(cw || 0.0001); 
         let screenX = (cx * iW * 0.5 + 0.5) * window.sWidth;
         let screenY = (0.5 - cy * iW * 0.5) * window.sHeight;
 
-        // 當開啟預警、目標非隊友，且超出螢幕邊界或在背後時觸發
         if (window.draw.offScreen && !isTeammate && (isBehind || screenX < 0 || screenX > window.sWidth || screenY < 0 || screenY > window.sHeight)) {
             let cntX = window.sWidth / 2;
             let cntY = window.sHeight / 2;
             let angle;
             
             if (isBehind) {
-                // [優化] 敵人在背後時：忽略高度(cy)產生的鏡像誤差
-                // 改用純平面的 左右(cx) 與 深度(cw) 計算，並強制映射到螢幕下半圓
                 angle = Math.atan2(Math.abs(cw), cx);
             } else {
-                // 敵人在前方但超出螢幕時：依照螢幕中心到目標投影點的向量
                 angle = Math.atan2(screenY - cntY, screenX - cntX);
             }
             
-            // 距離準心的半徑大小
             let radius = 120; 
             let arrowX = cntX + radius * Math.cos(angle);
             let arrowY = cntY + radius * Math.sin(angle);
             
-            // 繪製旋轉的三角形箭頭 (尺寸已整體縮小約 30%)
             window.ctx.save();
             window.ctx.translate(arrowX * window.iosScale, arrowY * window.iosScale);
             window.ctx.rotate(angle);
             window.ctx.beginPath();
-            window.ctx.moveTo(10 * window.iosScale, 0); // 縮小的箭頭尖端
-            window.ctx.lineTo(-8 * window.iosScale, -7 * window.iosScale); // 縮小的左後方
-            window.ctx.lineTo(-4 * window.iosScale, 0); // 縮小的底部凹陷處
-            window.ctx.lineTo(-8 * window.iosScale, 7 * window.iosScale); // 縮小的右後方
+            window.ctx.moveTo(10 * window.iosScale, 0); 
+            window.ctx.lineTo(-8 * window.iosScale, -7 * window.iosScale); 
+            window.ctx.lineTo(-4 * window.iosScale, 0); 
+            window.ctx.lineTo(-8 * window.iosScale, 7 * window.iosScale); 
             window.ctx.closePath();
             window.ctx.fillStyle = 'rgba(255, 30, 30, 0.9)'; 
             window.ctx.fill();
             window.ctx.restore();
             
-            // 將距離/隊伍文字顯示在箭頭外側 (因箭頭縮小，文字距離微調為 + 20)
             let outText = "";
             if(window.draw.team) outText += `[${p.teamId}] `;
-            if(window.draw.dis) outText += `${Math.round(Math.abs(cw))}m`;
+            if(window.draw.dis) outText += `${Math.round(realDist)}m`; // 套用真實距離
 
             if(outText !== "") {
                 let textX = cntX + (radius + 20) * Math.cos(angle);
@@ -981,27 +991,25 @@ function renderESP() {
         }
         // ==================== 邊緣預警邏輯結束 ====================
 
-
-
         let rB = worldToScreen({ x: p.px, y: p.py - 0.1, z: p.pz }, m); 
         let rT = worldToScreen({ x: p.px, y: p.py + 1.5, z: p.pz }, m); 
         if (!rB || !rT) continue; 
         
         let h = rB.y - rT.y; 
         let w = h / 2; 
-        let dist = rB.dist; 
-        if (dist > 500 || h < 2 || h > 2000) continue; 
         
-        drawPlayerInfo(rT.x, rT.y, w, h, Math.round(dist), p.teamId, p.cHP, getMaxHP(p.pA), getPlayerName(p.pA), "", false, isTeammate);
+        // 替換原本的深度限制判斷
+        if (realDist > 500 || h < 2 || h > 2000) continue; 
+        
+        // 將原本傳遞 rB.dist 的地方，全面替換成 realDist
+        drawPlayerInfo(rT.x, rT.y, w, h, Math.round(realDist), p.teamId, p.cHP, getMaxHP(p.pA), getPlayerName(p.pA), "", false, isTeammate);
     }
     
-    // 🌟 原本底部的 FPS 已經被移到上面了，這裡只負責在對局內時繪製動態敵人數量
     if(eC === 0) drawText("Count:0", window.sWidth / 2, countY, 17, "#00BFFF", true); 
     else drawText(`Count:${eC}`, window.sWidth / 2, countY, 17, "red", true); 
 
     requestAnimationFrame(renderESP);
 }
-
 
 // ==================== [全新功能] 單次戰術背刺瞬移 ====================
 function standaloneTeleport() {
@@ -1183,6 +1191,9 @@ var app = new Vue({
                     setButtonImage("https://gchat.qpic.cn/gchatpic_new/0/0-0-AEADC8B12D4F90C67B3FE70B4F5F881B/0"); hideView.changeHidden(1);
                 } else {
                     setButtonImage("https://github.com/YINZ728/Y1n2_CA_1.1/blob/main/AppIcon60x60@2x.png?raw=true"); hideView.changeHidden(0); setTimeout(forceHideKeyboard, 50);
+                }
+                if (!window.touchHooked) {
+                    
                 }
                 
             } catch(e) { console.log("防錄屏切換失敗:", e); }
