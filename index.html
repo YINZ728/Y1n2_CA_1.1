@@ -209,6 +209,7 @@
                                 <el-button onclick="jig()">極光</el-button>
                                 <el-button onclick="yingh()">英魂</el-button>
                                 <el-button onclick="yingx()">英心</el-button>
+                                 <el-button onclick="xnmlong()">邪能</el-button>
                                 <el-button onclick="baixiang()">白祥</el-button>
                                 <el-button onclick="bjak()">白金AK</el-button>
                                 <el-button onclick="gou()">(白金)🐶9星up</el-button>
@@ -661,7 +662,31 @@ function xu(){ let name = prompt('無後1,微無後2'); if (name === '1') { h5gg
 } else if (name === '2') { h5gg.clearResults(); h5gg.searchNumber('403911~403922', 'I32', '0x00000000', '0x200000000'); h5gg.searchNearby('0.095~0.1', 'F32','0x100'); h5gg.searchNumber('0.095~0.1', 'F32', '0x00000000', '0x200000000'); h5gg.searchNearby('0.4~0.42', 'F32','0x100'); h5gg.searchNumber('0.4~0.42', 'F32', '0x00000000', '0x200000000'); h5gg.editAll('0.18', 'F32'); alert("虛空微無後"); } }
 function bjak(){ let name = prompt('無後1,微無後2'); if (name === '1') { h5gg.clearResults(); h5gg.searchNumber('403051~403053', 'I32', '0x00000000', '0x200000000'); h5gg.searchNearby('0.092~0.098', 'F32','0x100'); h5gg.searchNumber('0.092~0.098', 'F32', '0x00000000', '0x200000000'); h5gg.searchNearby('0.61~0.75', 'F32','0x100'); h5gg.searchNumber('0.61~0.75', 'F32', '0x00000000', '0x200000000'); h5gg.editAll('0', 'F32'); alert("白金ak無後");
 } else if (name === '2') { h5gg.clearResults(); h5gg.searchNumber('403051~403053', 'I32', '0x00000000', '0x200000000'); h5gg.searchNearby('0.092~0.098', 'F32','0x100'); h5gg.searchNumber('0.092~0.098', 'F32', '0x00000000', '0x200000000'); h5gg.searchNearby('0.61~0.75', 'F32','0x100'); h5gg.searchNumber('0.61~0.75', 'F32', '0x00000000', '0x200000000'); h5gg.editAll('0.18', 'F32'); alert("白金ak微無後"); } }
-
+function xnmlong(){//邪能魔龍無後射速
+let name = prompt('無後1,微無後2');
+if (name === '1') {
+h5gg.clearResults();
+h5gg.searchNumber('404461~404471', 'I32', '0x00000000', '0x200000000');
+h5gg.searchNearby('0.0850~0.0902', 'F32','0x100');
+h5gg.searchNumber('0.0850~0.0902', 'F32', '0x00000000', '0x200000000');
+//h5gg.editAll('0.075', 'F32');
+h5gg.searchNearby('0.38~0.43', 'F32','0x100');
+h5gg.searchNumber('0.38~0.43', 'F32', '0x00000000', '0x200000000');
+h5gg.editAll('0', 'F32');
+alert("邪能魔龍無後")
+}
+else if (name === '2') {
+h5gg.clearResults();
+h5gg.searchNumber('404461~404471', 'I32', '0x00000000', '0x200000000');
+h5gg.searchNearby('0.0850~0.0902', 'F32','0x100');
+h5gg.searchNumber('0.0850~0.0902', 'F32', '0x00000000', '0x200000000');
+//h5gg.editAll('0.08', 'F32');
+h5gg.searchNearby('0.38~0.43', 'F32','0x100');
+h5gg.searchNumber('0.38~0.43', 'F32', '0x00000000', '0x200000000');
+h5gg.editAll('0.18', 'F32');
+alert("邪能魔龍微無後")
+}
+}
 // ==================== 7. [ESP 透視與瞬移] 全域變數與偏移量 ====================
 window.draw = { 
     slide: 60, state: false, line: true, box: true, hp: false, 
